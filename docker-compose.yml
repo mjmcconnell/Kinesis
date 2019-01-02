@@ -3,3 +3,6 @@ version: '3.1'
 services:
   app:
     image: python:3.7
+    volumes:
+      - ./app:/usr/src
+    working_dir: /usr/src
