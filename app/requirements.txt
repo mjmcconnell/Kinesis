@@ -1,7 +1,9 @@
 boto==2.49.0
 Click==7.0
+fake-factory==0.2
 Flask==1.0.2
 itsdangerous==1.1.0
 Jinja2==2.10
 MarkupSafe==1.1.0
+python-testdata==1.0.5
 Werkzeug==0.14.1
