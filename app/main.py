@@ -26,6 +26,8 @@ class KinesisStream(object):
             time.sleep(2)
 
     def start(self):
+        """Populates the stream with user data.
+        """
         for i in range(50):
             user = {
                 'name': f'user {i}',
@@ -34,15 +36,46 @@ class KinesisStream(object):
             _kinesis.put_record(KINESIS_STREAM_ID, json.dumps(user), "partitionkey")
 
     def describe(self):
+        """
+        Desc sample output:
+            {
+                'StreamDescription': {
+                    'EncryptionType': 'NONE',
+                    'EnhancedMonitoring': [{
+                        'ShardLevelMetrics': []
+                    }],
+                    'HasMoreShards': False,
+                    'RetentionPeriodHours': 24,
+                    'Shards': [],
+                    'StreamARN': 'arn:aws:kinesis:eu-west-1:091595401634:stream/kinesis-sample',
+                    'StreamCreationTimestamp': 1546442664.0,
+                    'StreamName': 'kinesis-sample',
+                    'StreamStatus': 'CREATING'
+                }
+            }
+
+        List streams sample output:
+            {
+                'HasMoreStreams': False,
+                'StreamNames': ['kinesis-sample']
+            }
+        """
         print(self.desc)
         print(_kinesis.list_streams())
 
-        # {'StreamDescription': {'EncryptionType': 'NONE', 'EnhancedMonitoring': [{'ShardLevelMetrics': []}], 'HasMoreShards': False, 'RetentionPeriodHours': 24, 'Shards': [], 'StreamARN': 'arn:aws:kinesis:eu-west-1:091595401634:stream/kinesis-sample', 'StreamCreationTimestamp': 1546442664.0, 'StreamName': 'kinesis-sample', 'StreamStatus': 'CREATING'}}
-        # {'HasMoreStreams': False, 'StreamNames': ['kinesis-sample']}
 
-
-def watch():
-    shard_id = 'shardId-000000000000'   #we only have one shard!
+def watch(shard_id='shardId-000000000000'):
+    """Outputs the current data within a given shard (shard_id) every 0.2 seconds.
+    Sample output:
+        {
+            'Records': [{
+                'PartitionKey': 'partitionkey',
+                'Data': '{"lastname": "Rau", "age": 23, "firstname": "Peyton", "gender": "male"}',
+                'SequenceNumber': '(int)'
+            }, ...],
+            'NextShardIterator': '(str)'
+        }
+    """
     shard_it = _kinesis.get_shard_iterator(KINESIS_STREAM_ID, shard_id, "LATEST")["ShardIterator"]
 
     while True:
@@ -50,10 +83,10 @@ def watch():
         shard_it = out["NextShardIterator"]
         print(out)
         time.sleep(0.2)
-        # {u'Records': [{u'PartitionKey': u'partitionkey', u'Data': u'{"lastname": "Rau", "age": 23, "firstname": "Peyton", "gender": "male"}', u'SequenceNumber': u'49547280908463336004254488250517179461390244620594577410'}, {u'PartitionKey': u'partitionkey', u'Data': u'{"lastname": "Mante", "age": 29, "firstname": "Betsy", "gender": "male"}', u'SequenceNumber': u'49547280908463336004254488250518388387209859249769283586'}], u'NextShardIterator': u'AAAAAAAAAAEvI7MPAuwLucWMwYtZnATetztUUTqgtQaTaihyV/+buCmSqBdKnAwv2dMNeGlYo3fvYCcH6aI/A+DtG3uq+MnG8AlyrX7UrHnlX5OF0xG/IEhSJyyToPvwtJ8odDoWShib3bjuk+944QcsPrRRsUsBNx6xyKgnY+xi9lXvweiImL1ByK5Bdj0sLoRp/9nBWfw='}
 
 
 def close():
+    """Removes the active stream from AWS."""
     print('############ CLOSING STREAM')
     _kinesis.delete_stream(KINESIS_STREAM_ID)
 
