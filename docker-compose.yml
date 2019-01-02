@@ -6,4 +6,9 @@ services:
     volumes:
       - ./app:/usr/src
       - ./boto.cfg:/etc/boto.cfg
+      - pypackages:/usr/local/lib/python3.7/site-packages
     working_dir: /usr/src
+
+volumes:
+  pypackages:
+    driver: local
