@@ -15,15 +15,16 @@ _kinesis = kinesis.connect_to_region(KINESIS_REGION)
 
 class KinesisStream(object):
 
-    def __init__(self, _kinesis, shard_count=1):
+    def __init__(self, shard_count=1):
         """
-        shard_count:
-            Type: Integer (1-100000)
-            Desc:
-                The number of shards that the stream will use. The
-                throughput of the stream is a function of the number of
-                shards; more shards are required for greater provisioned
-                throughput.
+        Parameters:
+            shard_count:
+                Type: Integer (1-100000)
+                Desc:
+                    The number of shards that the stream will use. The
+                    throughput of the stream is a function of the number of
+                    shards; more shards are required for greater provisioned
+                    throughput.
         """
         try:
             resp = _kinesis.create_stream(
@@ -36,8 +37,8 @@ class KinesisStream(object):
 
         stream_desc = _kinesis.describe_stream(KINESIS_STREAM_ID)
         while stream_desc['StreamDescription']['StreamStatus'] == 'CREATING':
+            print(stream_desc['StreamDescription']['StreamStatus'])
             time.sleep(2)
-            _kinesis = kinesis.connect_to_region(KINESIS_REGION)
 
     def start(self):
         """Populates the stream with user data.
@@ -48,6 +49,35 @@ class KinesisStream(object):
                 'address': f'address {i}'
             }
             _kinesis.put_record(KINESIS_STREAM_ID, json.dumps(user), "partitionkey")
+
+    @classmethod
+    def _list_streams(cls, limit=10, exclusive_start_stream_name=None):
+        """Method for listing all live streams for the active region.
+        Lists streams in batchs of [limit], until all streams are fetched, due
+        to limitations placed on the api endpoint.
+
+        Parameters:
+            Limit (integer) -- The maximum number of streams to list.
+            ExclusiveStartStreamName (string) -- The name of the stream to start the list with.
+
+        `list_streams` sample response:
+            {
+                'HasMoreStreams': False,
+                'StreamNames': ['kinesis-sample']
+            }
+        """
+        stream_names = []
+        response = _kinesis.list_streams(
+            Limit=limit,
+            ExclusiveStartStreamName=exclusive_start_stream_name
+        )
+        stream_names += response['StreamNames']
+        if response['HasMoreStreams']:
+            stream_names += cls._list_streams(
+                exclusive_start_stream_name=stream_names[-1]
+            )
+
+        return stream_names
 
     def describe(self):
         """
@@ -68,13 +98,8 @@ class KinesisStream(object):
                 }
             }
 
-        List streams sample output:
-            {
-                'HasMoreStreams': False,
-                'StreamNames': ['kinesis-sample']
-            }
         """
-        streams = _kinesis.list_streams()
+        streams = self._list_streams()
         print(streams)
 
         for stream_name in streams['StreamNames']:
@@ -111,7 +136,7 @@ def close():
 
 if __name__ == "__main__":
     print('############ CREATING NEW STREAM')
-    stream = KinesisStream(_kinesis)
+    stream = KinesisStream()
     try:
         print('############ STREAM DESC')
         stream.describe()
