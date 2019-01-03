@@ -8,7 +8,6 @@ from flask import render_template
 from flask import request
 
 # local imports
-from config import KINESIS_STREAM_ID
 from kinesis_manager import KinesisStreamManager
 
 
