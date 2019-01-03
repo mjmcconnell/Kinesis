@@ -26,12 +26,20 @@ class KinesisStreamManager(object):
             pass
 
     @classmethod
-    def _enable_stream_encryption(cls):
-        pass
+    def _enable_stream_encryption(cls, encryption_type, key_id):
+        return client.start_stream_encryption(
+            stream_name=KINESIS_STREAM_ID,
+            encryption_type=encryption_type,
+            key_id=key_id
+        )
 
     @classmethod
-    def _disable_stream_encryption(cls):
-        pass
+    def _disable_stream_encryption(cls, encryption_type, key_id):
+        return client.stop_stream_encryption(
+            stream_name=KINESIS_STREAM_ID,
+            encryption_type=encryption_type,
+            key_id=key_id
+        )
 
     @classmethod
     def _current_stream_status(cls):
@@ -105,22 +113,22 @@ class KinesisStreamManager(object):
         shard_it = client.get_shard_iterator(KINESIS_STREAM_ID, shard_id, 'LATEST')['ShardIterator']
 
         while True:
-            out = client.get_records(shard_it, limit=2)
+            out = client.get_records(shard_it, limit=50)
             shard_it = out['NextShardIterator']
             print(out)
-            time.sleep(0.2)
+            time.sleep(1)
 
     @classmethod
     def create(cls, shard_count=1):
         return cls._create_stream(shard_count)
 
     @classmethod
-    def enable_encryption(cls):
-        cls._enable_stream_encryption()
+    def enable_encryption(cls, encryption_type='KMS', key_id='aws/kinesis'):
+        cls._enable_stream_encryption(encryption_type, key_id)
 
     @classmethod
-    def disable_encryption(cls):
-        cls._disable_stream_encryption()
+    def disable_encryption(cls, encryption_type='KMS', key_id='aws/kinesis'):
+        cls._disable_stream_encryption(encryption_type, key_id)
 
     @classmethod
     def status(cls):
@@ -154,4 +162,5 @@ class KinesisStreamManager(object):
                 'name': f'user {i}',
                 'address': f'address {i}'
             }
-            client.put_record(KINESIS_STREAM_ID, json.dumps(user), 'partitionkey')
+            resp = client.put_record(KINESIS_STREAM_ID, json.dumps(user), 'partitionkey')
+            print(resp)
