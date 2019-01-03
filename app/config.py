@@ -1,7 +1,7 @@
 # KINESIS_REGION
 #
 # AWS region where the stream should be hosted from
-KINESIS_REGION = 'eu-west-1'
+KINESIS_REGION = 'eu-west-2'
 
 # KINESIS_STREAM_ID
 #
@@ -14,4 +14,4 @@ KINESIS_REGION = 'eu-west-1'
 # Region. That is, two streams in two different AWS accounts can have the same
 # name. Two streams in the same AWS account but in two different Regions can
 # also have the same name.
-KINESIS_STREAM_ID = 'kinesis-sample'
+KINESIS_STREAM_ID = 'marks-test-kinesis-stream'

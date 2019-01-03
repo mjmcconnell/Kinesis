@@ -98,7 +98,8 @@ class KinesisStreamManager(object):
         """
         return client.describe_stream(stream_name=stream_name)
 
-    def _watch_stream_shard(shard_id):
+    @classmethod
+    def _watch_stream_shard(cls, shard_id):
         """Outputs the current data within a given shard (shard_id) every 0.2 seconds.
         Sample output:
             {
@@ -110,13 +111,17 @@ class KinesisStreamManager(object):
                 'NextShardIterator': '(str)'
             }
         """
-        shard_it = client.get_shard_iterator(KINESIS_STREAM_ID, shard_id, 'LATEST')['ShardIterator']
+        shard_it = cls.get_current_iterator()
 
         while True:
             out = client.get_records(shard_it, limit=50)
             shard_it = out['NextShardIterator']
             print(out)
             time.sleep(1)
+
+    @classmethod
+    def get_current_iterator(cls, shard_id):
+        return client.get_shard_iterator(KINESIS_STREAM_ID, shard_id, 'LATEST')['ShardIterator']
 
     @classmethod
     def create(cls, shard_count=1):
@@ -155,12 +160,13 @@ class KinesisStreamManager(object):
         """Populates the stream with user data.
 
         `put_record` sample response:
-        {'SequenceNumber': '4959167...', 'ShardId': 'shardId-000000000000'}
+            {'SequenceNumber': '4959167...', 'ShardId': 'shardId-000000000000'}
+
+        Returns the latest
         """
         for i in range(num_users):
             user = {
                 'name': f'user {i}',
                 'address': f'address {i}'
             }
-            resp = client.put_record(KINESIS_STREAM_ID, json.dumps(user), 'partitionkey')
-            print(resp)
+            client.put_record(KINESIS_STREAM_ID, json.dumps(user), 'partitionkey')

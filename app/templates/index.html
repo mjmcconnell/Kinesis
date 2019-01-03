@@ -1,11 +1,5 @@
 <h1>Hello World</h1>
 
-<form method="POST" action="/add">
-    <label>Number of random users to add:</label>
-    <input type="number" name="num_users">
-    <input type="submit" label="submit">
-</form>
-
 <h3>Streams</h3>
 <hr>
 {% for stream_data in active_streams.values() %}
@@ -13,3 +7,14 @@
         <p>{{k}}: {{v}}</p>
     {% endfor %}
 {% endfor %}
+
+<form method="POST" action="/add">
+    <label>Number of random users to add to shard:</label>
+    <input type="number" name="num_users">
+    <input type="submit" label="submit">
+</form>
+
+
+{{current_iterators}}
+
+<a href="\">Update</a>
