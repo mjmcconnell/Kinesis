@@ -1,26 +1,32 @@
+pip-install:
+	pip install -r requirements.txt
+
+run: pip-install
+	flask run -h 0.0.0.0 -p 8080
+
 create:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.create()'
 
 enable_encryption:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.create()'
 
 disable_encryption:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.create()'
 
 status:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.status()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.status()'
 
 list:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.list()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.list()'
 
 describe:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.describe("$(stream_name)")'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.describe("$(stream_name)")'
 
 watch:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.watch("$(shard_id)")'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.watch("$(shard_id)")'
 
 load:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.load()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.load()'
 
 close:
-	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.close()'
+	@python -c 'from kinesis_manager import KinesisStreamManager; KinesisStreamManager.close()'

@@ -3,12 +3,13 @@ version: '3.1'
 services:
   app:
     image: python:3.7
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
     volumes:
       - ./app:/usr/src
       - ./boto.cfg:/etc/boto.cfg
-      - pypackages:/usr/local/lib/python3.7/site-packages
+    ports:
+      - 8080:8080
     working_dir: /usr/src
-
-volumes:
-  pypackages:
-    driver: local
+    command: make run
