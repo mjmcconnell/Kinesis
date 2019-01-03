@@ -1,8 +1,6 @@
-# stdlib imports
-import json
-
 # third-party imports
 from flask import Flask
+from flask import redirect
 from flask import render_template
 from flask import request
 
@@ -17,4 +15,5 @@ def index():
 
 @app.route('/add', methods=['POST'])
 def add():
-    return json.dumps(request.form)
+    print(request.form)
+    return redirect('/')
