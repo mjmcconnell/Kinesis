@@ -15,7 +15,17 @@
     <input type="submit" label="submit">
 </form>
 
+<hr>
 
-{{records}}
+<a href="\?next_shard_it={{current_iterator}}">Refresh</a>
 
-<a href="\">Update</a>
+<hr>
+<h2>Records</h2>
+<table>
+    {% for r in records %}
+        <tr>
+            <td>{{r}}</td>
+        </tr>
+    {% endfor %}
+
+</table>

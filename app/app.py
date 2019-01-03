@@ -32,11 +32,12 @@ def index():
             latest_records = stream.get_latest_records(shard['ShardId'], current_iterator)
             next_iterator = latest_records['NextShardIterator']
             if latest_records['Records']:
-                records.append(latest_records['Records'])
+                records = latest_records['Records']
 
     return render_template('index.html', **{
         'active_streams': active_streams,
-        'next_iterator': next_iterator,
+        'current_iterator': urllib.parse.quote_plus(current_iterator) if current_iterator else '',
+        'next_iterator': urllib.parse.quote_plus(next_iterator),
         'records': records
     })
 
@@ -47,5 +48,4 @@ def add():
     next_shard_it = request.form.get('next_shard_it')
     print(f'CREATING {num_users} USER ACCOUNTS')
     stream.load(int(num_users))
-    safe_next_shard_it = urllib.parse.quote_plus(next_shard_it)
-    return redirect(f'/?next_shard_it={safe_next_shard_it}')
+    return redirect(f'/?next_shard_it={next_shard_it}')
