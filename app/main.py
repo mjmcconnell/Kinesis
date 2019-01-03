@@ -34,8 +34,8 @@ class KinesisStream(object):
         except kinesis.exceptions.ResourceInUseException:
             pass
 
-        self.desc = _kinesis.describe_stream(KINESIS_STREAM_ID)
-        while self.desc['StreamDescription']['StreamStatus'] == 'CREATING':
+        stream_desc = _kinesis.describe_stream(KINESIS_STREAM_ID)
+        while stream_desc['StreamDescription']['StreamStatus'] == 'CREATING':
             time.sleep(2)
             _kinesis = kinesis.connect_to_region(KINESIS_REGION)
 
@@ -74,8 +74,12 @@ class KinesisStream(object):
                 'StreamNames': ['kinesis-sample']
             }
         """
-        print(self.desc)
-        print(_kinesis.list_streams())
+        streams = _kinesis.list_streams()
+        print(streams)
+
+        for stream_name in streams['StreamNames']:
+            stream_desc = _kinesis.describe_stream(StreamName=stream_name)
+            print(stream_desc)
 
 
 def watch(shard_id='shardId-000000000000'):
