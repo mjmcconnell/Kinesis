@@ -25,10 +25,10 @@ class KinesisStreamManager(object):
         except kinesis.exceptions.ResourceInUseException:
             pass
 
+    @classmethod
+    def _current_stream_status(cls):
         stream_desc = client.describe_stream(KINESIS_STREAM_ID)
-        while stream_desc['StreamDescription']['StreamStatus'] == 'CREATING':
-            print(stream_desc['StreamDescription']['StreamStatus'])
-            time.sleep(2)
+        return stream_desc['StreamDescription']['StreamStatus']
 
     @classmethod
     def _list_streams(cls, limit, exclusive_start_stream_name):
@@ -107,6 +107,10 @@ class KinesisStreamManager(object):
         return cls._create_stream(shard_count)
 
     @classmethod
+    def status(cls):
+        print(cls._current_stream_status())
+
+    @classmethod
     def list(cls, limit=10, exclusive_start_stream_name=None):
         print(cls._list_streams(limit, exclusive_start_stream_name))
 
@@ -120,11 +124,14 @@ class KinesisStreamManager(object):
 
     @classmethod
     def close(cls):
-        return client.delete_stream(KINESIS_STREAM_ID)
+        return print(client.delete_stream(KINESIS_STREAM_ID))
 
     @classmethod
     def load(cls):
         """Populates the stream with user data.
+
+        `put_record` sample response:
+        {'SequenceNumber': '4959167...', 'ShardId': 'shardId-000000000000'}
         """
         for i in range(50):
             user = {
