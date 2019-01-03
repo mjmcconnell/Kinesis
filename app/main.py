@@ -10,45 +10,25 @@ from config import KINESIS_REGION
 from config import KINESIS_STREAM_ID
 
 
-_kinesis = kinesis.connect_to_region(KINESIS_REGION)
+client = kinesis.connect_to_region(KINESIS_REGION)
 
 
-class KinesisStream(object):
+class KinesisStreamManager(object):
 
-    def __init__(self, shard_count=1):
-        """
-        Parameters:
-            shard_count:
-                Type: Integer (1-100000)
-                Desc:
-                    The number of shards that the stream will use. The
-                    throughput of the stream is a function of the number of
-                    shards; more shards are required for greater provisioned
-                    throughput.
-        """
+    @classmethod
+    def _create_stream(shard_count=1):
         try:
-            resp = _kinesis.create_stream(
+            client.create_stream(
                 StreamName=KINESIS_STREAM_ID,
                 ShardCount=shard_count
             )
-            print(resp)
         except kinesis.exceptions.ResourceInUseException:
             pass
 
-        stream_desc = _kinesis.describe_stream(KINESIS_STREAM_ID)
+        stream_desc = client.describe_stream(KINESIS_STREAM_ID)
         while stream_desc['StreamDescription']['StreamStatus'] == 'CREATING':
             print(stream_desc['StreamDescription']['StreamStatus'])
             time.sleep(2)
-
-    def start(self):
-        """Populates the stream with user data.
-        """
-        for i in range(50):
-            user = {
-                'name': f'user {i}',
-                'address': f'address {i}'
-            }
-            _kinesis.put_record(KINESIS_STREAM_ID, json.dumps(user), "partitionkey")
 
     @classmethod
     def _list_streams(cls, limit=10, exclusive_start_stream_name=None):
@@ -67,7 +47,7 @@ class KinesisStream(object):
             }
         """
         stream_names = []
-        response = _kinesis.list_streams(
+        response = client.list_streams(
             Limit=limit,
             ExclusiveStartStreamName=exclusive_start_stream_name
         )
@@ -79,7 +59,7 @@ class KinesisStream(object):
 
         return stream_names
 
-    def describe(self):
+    def _describe_stream(self, stream_name):
         """
         Desc sample output:
             {
@@ -99,50 +79,55 @@ class KinesisStream(object):
             }
 
         """
-        streams = self._list_streams()
-        print(streams)
+        return client.describe_stream(StreamName=stream_name)
 
-        for stream_name in streams['StreamNames']:
-            stream_desc = _kinesis.describe_stream(StreamName=stream_name)
-            print(stream_desc)
+    def _watch_stream_shard(shard_id):
+        """Outputs the current data within a given shard (shard_id) every 0.2 seconds.
+        Sample output:
+            {
+                'Records': [{
+                    'PartitionKey': 'partitionkey',
+                    'Data': '{"lastname": "Rau", "age": 23, "firstname": "Peyton", "gender": "male"}',
+                    'SequenceNumber': '(int)'
+                }, ...],
+                'NextShardIterator': '(str)'
+            }
+        """
+        shard_it = client.get_shard_iterator(KINESIS_STREAM_ID, shard_id, "LATEST")["ShardIterator"]
 
+        while True:
+            out = client.get_records(shard_it, limit=2)
+            shard_it = out["NextShardIterator"]
+            print(out)
+            time.sleep(0.2)
 
-def watch(shard_id='shardId-000000000000'):
-    """Outputs the current data within a given shard (shard_id) every 0.2 seconds.
-    Sample output:
-        {
-            'Records': [{
-                'PartitionKey': 'partitionkey',
-                'Data': '{"lastname": "Rau", "age": 23, "firstname": "Peyton", "gender": "male"}',
-                'SequenceNumber': '(int)'
-            }, ...],
-            'NextShardIterator': '(str)'
-        }
-    """
-    shard_it = _kinesis.get_shard_iterator(KINESIS_STREAM_ID, shard_id, "LATEST")["ShardIterator"]
+    @classmethod
+    def create(cls, shard_count):
+        return cls._create_stream(shard_count)
 
-    while True:
-        out = _kinesis.get_records(shard_it, limit=2)
-        shard_it = out["NextShardIterator"]
-        print(out)
-        time.sleep(0.2)
+    @classmethod
+    def list(cls):
+        print(cls._list_streams())
 
+    @classmethod
+    def describe(cls, stream_name):
+        print(cls._describe_stream(stream_name))
 
-def close():
-    """Removes the active stream from AWS."""
-    print('############ CLOSING STREAM')
-    _kinesis.delete_stream(KINESIS_STREAM_ID)
+    @classmethod
+    def watch(cls, shard_id):
+        cls._watch_stream_shard(shard_id)
 
+    @classmethod
+    def close(cls):
+        return client.delete_stream(KINESIS_STREAM_ID)
 
-if __name__ == "__main__":
-    print('############ CREATING NEW STREAM')
-    stream = KinesisStream()
-    try:
-        print('############ STREAM DESC')
-        stream.describe()
-        print('############ STARTING POPULATING')
-        stream.start()
-        print('############ STREAM DESC')
-        stream.describe()
-    except Exception as e:
-        print(e)
+    @classmethod
+    def populate_users(self):
+        """Populates the stream with user data.
+        """
+        for i in range(50):
+            user = {
+                'name': f'user {i}',
+                'address': f'address {i}'
+            }
+            client.put_record(KINESIS_STREAM_ID, json.dumps(user), "partitionkey")
