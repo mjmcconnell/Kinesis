@@ -99,25 +99,11 @@ class KinesisStreamManager(object):
         return client.describe_stream(stream_name=stream_name)
 
     @classmethod
-    def _watch_stream_shard(cls, shard_id):
-        """Outputs the current data within a given shard (shard_id) every 0.2 seconds.
-        Sample output:
-            {
-                'Records': [{
-                    'PartitionKey': 'partitionkey',
-                    'Data': '{"lastname": "Rau", "age": 23, "firstname": "Peyton", "gender": "male"}',
-                    'SequenceNumber': '(int)'
-                }, ...],
-                'NextShardIterator': '(str)'
-            }
-        """
-        shard_it = cls.get_current_iterator()
+    def get_latest_records(cls, shard_id, shard_it=None):
+        if shard_it is None:
+            shard_it = cls.get_current_iterator(shard_id)
 
-        while True:
-            out = client.get_records(shard_it, limit=50)
-            shard_it = out['NextShardIterator']
-            print(out)
-            time.sleep(1)
+        return client.get_records(shard_iterator=shard_it)
 
     @classmethod
     def get_current_iterator(cls, shard_id):
@@ -148,12 +134,8 @@ class KinesisStreamManager(object):
         return cls._describe_stream(stream_name).get('StreamDescription')
 
     @classmethod
-    def watch(cls, shard_id):
-        cls._watch_stream_shard(shard_id)
-
-    @classmethod
     def close(cls):
-        return print(client.delete_stream(KINESIS_STREAM_ID))
+        return client.delete_stream(KINESIS_STREAM_ID)
 
     @classmethod
     def load(cls, num_users):

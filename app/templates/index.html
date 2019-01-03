@@ -9,12 +9,13 @@
 {% endfor %}
 
 <form method="POST" action="/add">
+    <input type="hidden" name="next_shard_it" value="{{next_iterator}}">
     <label>Number of random users to add to shard:</label>
     <input type="number" name="num_users">
     <input type="submit" label="submit">
 </form>
 
 
-{{current_iterators}}
+{{records}}
 
 <a href="\">Update</a>
