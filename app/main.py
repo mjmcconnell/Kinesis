@@ -26,6 +26,14 @@ class KinesisStreamManager(object):
             pass
 
     @classmethod
+    def _enable_stream_encryption(cls):
+        pass
+
+    @classmethod
+    def _disable_stream_encryption(cls):
+        pass
+
+    @classmethod
     def _current_stream_status(cls):
         stream_desc = client.describe_stream(KINESIS_STREAM_ID)
         return stream_desc['StreamDescription']['StreamStatus']
@@ -105,6 +113,14 @@ class KinesisStreamManager(object):
     @classmethod
     def create(cls, shard_count=1):
         return cls._create_stream(shard_count)
+
+    @classmethod
+    def enable_encryption(cls):
+        cls._enable_stream_encryption()
+
+    @classmethod
+    def disable_encryption(cls):
+        cls._disable_stream_encryption()
 
     @classmethod
     def status(cls):

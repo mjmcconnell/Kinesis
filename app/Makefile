@@ -1,6 +1,12 @@
 create:
 	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
 
+enable_encryption:
+	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
+
+disable_encryption:
+	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.create()'
+
 status:
 	@python -c 'from main import KinesisStreamManager; KinesisStreamManager.status()'
 
