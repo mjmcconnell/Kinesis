@@ -1,8 +1,15 @@
 <h1>Hello World</h1>
 
-
 <form method="POST" action="/add">
     <label>Number of random users to add:</label>
     <input type="number" name="num_users">
     <input type="submit" label="submit">
 </form>
+
+<h3>Streams</h3>
+<hr>
+{% for stream_data in active_streams.values() %}
+    {% for k, v in stream_data.items() %}
+        <p>{{k}}: {{v}}</p>
+    {% endfor %}
+{% endfor %}

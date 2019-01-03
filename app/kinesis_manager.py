@@ -131,16 +131,16 @@ class KinesisStreamManager(object):
         cls._disable_stream_encryption(encryption_type, key_id)
 
     @classmethod
-    def status(cls):
-        print(cls._current_stream_status())
+    def get_status(cls):
+        return cls._current_stream_status()
 
     @classmethod
     def list(cls, limit=10, exclusive_start_stream_name=None):
-        print(cls._list_streams(limit, exclusive_start_stream_name))
+        return cls._list_streams(limit, exclusive_start_stream_name)
 
     @classmethod
     def describe(cls, stream_name):
-        print(cls._describe_stream(stream_name))
+        return cls._describe_stream(stream_name).get('StreamDescription')
 
     @classmethod
     def watch(cls, shard_id):
@@ -151,13 +151,13 @@ class KinesisStreamManager(object):
         return print(client.delete_stream(KINESIS_STREAM_ID))
 
     @classmethod
-    def load(cls):
+    def load(cls, num_users):
         """Populates the stream with user data.
 
         `put_record` sample response:
         {'SequenceNumber': '4959167...', 'ShardId': 'shardId-000000000000'}
         """
-        for i in range(50):
+        for i in range(num_users):
             user = {
                 'name': f'user {i}',
                 'address': f'address {i}'
