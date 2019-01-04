@@ -27,7 +27,6 @@ def get_streams():
 
 @app.route('/')
 def index():
-    active_streams = defaultdict(dict)
     next_iterator = ''
     shard_records = defaultdict(list)
 
@@ -48,7 +47,6 @@ def index():
 
     return render_template('index.html', **{
         'streams': get_streams(),
-        'active_streams': active_streams,
         'active_stream_name': active_stream_name,
         'current_iterator': urllib.parse.quote_plus(current_iterator) if current_iterator else '',
         'next_iterator': urllib.parse.quote_plus(next_iterator),
