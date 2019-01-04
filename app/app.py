@@ -73,8 +73,9 @@ def set_stream():
     is_encrypted = request.form.get('is_encrypted')
 
     if new_stream_name:
-        stream_name = stream.create(
-            stream_name=new_stream_name,
+        stream_name = new_stream_name
+        stream.create(
+            stream_name=stream_name,
             shard_count=int(shard_count),
             is_encrypted=int(is_encrypted)
         )
