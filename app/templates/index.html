@@ -37,13 +37,13 @@
 
 <h3>Records</h3>
 <hr>
-{% for shard_id, records in shard_records.items() %}
+{% for shard_id, shard in shard_data.items() %}
     <table>
         <thead>
             <tr><td>{{shard_id}}</td></tr>
         </thead>
         <tbody>
-            {% for record in records %}
+            {% for record in shard['records'] %}
                 <tr>
                     <td>{{r}}</td>
                 </tr>

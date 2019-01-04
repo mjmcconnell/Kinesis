@@ -28,7 +28,7 @@ def get_streams():
 @app.route('/')
 def index():
     next_iterator = ''
-    shard_records = defaultdict(list)
+    shard_data = defaultdict(dict)
 
     current_iterator = request.args.get('next_shard_it')
     active_stream_name = request.args.get('active_stream_name')
@@ -42,15 +42,15 @@ def index():
                 current_iterator
             )
             if latest_records:
-                next_iterator = latest_records['NextShardIterator']
-                shard_records[shard['ShardId']] = latest_records['Records']
+                shard_data[shard['ShardId']]['next_iterator'] = latest_records['NextShardIterator']
+                shard_data[shard['ShardId']]['records'] = latest_records['Records']
 
     return render_template('index.html', **{
         'streams': get_streams(),
         'active_stream_name': active_stream_name,
         'current_iterator': urllib.parse.quote_plus(current_iterator) if current_iterator else '',
         'next_iterator': urllib.parse.quote_plus(next_iterator),
-        'shard_records': shard_records,
+        'shard_data': shard_data,
     })
 
 
