@@ -1,31 +1,37 @@
 <h1>Hello World</h1>
 
 <h3>Streams</h3>
-<hr>
-{% for stream_data in active_streams.values() %}
-    {% for k, v in stream_data.items() %}
-        <p>{{k}}: {{v}}</p>
-    {% endfor %}
-{% endfor %}
+<form method="POST" action="/set_stream">
+    <label>Select active stream</label>
+    <select name="stream_name">
+        {% for stream_name, stream_label in streams %}
+            <option>-----</option>
+            <option value="{{stream_name}}" {% if stream_name == active_stream_name %} selected {% endif %}>
+                {{stream_label}}
+            </option>
+        {% endfor %}
+    </select>
+    <hr>
+    <label>Create new stream</label>
+    <input type="text" name="new_stream_name">
+    <hr>
+    <input type="submit" label="submit">
+</form>
 
-<form method="POST" action="/add">
+<hr>
+
+<form method="POST" action="/add_records">
     <input type="hidden" name="next_shard_it" value="{{next_iterator}}">
     <label>Number of random users to add to shard:</label>
     <input type="number" name="num_users">
     <input type="submit" label="submit">
 </form>
 
-<hr>
-
-<a href="\?next_shard_it={{current_iterator}}">Refresh</a>
-
-<hr>
-<h2>Records</h2>
+<h3>Records</h3>
 <table>
     {% for r in records %}
         <tr>
             <td>{{r}}</td>
         </tr>
     {% endfor %}
-
 </table>

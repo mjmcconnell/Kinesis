@@ -17,6 +17,14 @@ stream = KinesisStreamManager()
 stream.create()
 
 
+def get_streams():
+    streams = []
+    for stream_name in stream.list():
+        status = stream.describe(stream_name).get('StreamStatus')
+        streams.append((stream_name, f'{stream_name} ({status})'))
+    return streams
+
+
 @app.route('/')
 def index():
     active_streams = defaultdict(dict)
@@ -36,6 +44,7 @@ def index():
                     records = latest_records['Records']
 
     return render_template('index.html', **{
+        'streams': get_streams(),
         'active_streams': active_streams,
         'current_iterator': urllib.parse.quote_plus(current_iterator) if current_iterator else '',
         'next_iterator': urllib.parse.quote_plus(next_iterator),
