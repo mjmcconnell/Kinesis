@@ -27,10 +27,9 @@ def get_streams():
 
 @app.route('/')
 def index():
-    next_iterator = ''
     shard_data = defaultdict(dict)
+    shard_its = {k: v for k, v in request.args.items() if k.startswith('shardId')}
 
-    current_iterator = request.args.get('next_shard_it')
     active_stream_name = request.args.get('active_stream_name')
 
     if active_stream_name:
@@ -39,33 +38,32 @@ def index():
             latest_records = stream.get_latest_records(
                 active_stream_name,
                 shard['ShardId'],
-                current_iterator
+                shard_its.get(shard['ShardId'])
             )
             if latest_records:
-                shard_data[shard['ShardId']]['next_iterator'] = latest_records['NextShardIterator']
+                shard_data[shard['ShardId']]['next_iterator'] = urllib.parse.quote_plus(
+                    latest_records['NextShardIterator'])
                 shard_data[shard['ShardId']]['records'] = latest_records['Records']
 
     return render_template('index.html', **{
         'streams': get_streams(),
         'active_stream_name': active_stream_name,
-        'current_iterator': urllib.parse.quote_plus(current_iterator) if current_iterator else '',
-        'next_iterator': urllib.parse.quote_plus(next_iterator),
         'shard_data': shard_data,
     })
 
 
 @app.route('/add_records', methods=['POST'])
 def add():
+    shard_its = '&'.join([f'{k}={v}' for k, v in request.form.items() if k.startswith('shardId')])
     num_users = request.form.get('num_users', 0)
-    next_shard_it = request.form.get('next_shard_it')
-    active_stream_name = request.form.get('active_stream_name')
+    stream_name = request.form.get('active_stream_name')
 
     print(f'CREATING {num_users} USER ACCOUNTS')
     stream.load(
-        stream_name=active_stream_name,
+        stream_name=stream_name,
         num_users=int(num_users)
     )
-    return redirect(f'/?next_shard_it={next_shard_it}')
+    return redirect(f'/?active_stream_name={stream_name}&{shard_its}')
 
 
 @app.route('/set_stream', methods=['POST'])

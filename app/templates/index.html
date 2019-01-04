@@ -28,7 +28,9 @@
 <hr>
 
 <form method="POST" action="/add_records">
-    <input type="hidden" name="next_shard_it" value="{{next_iterator}}">
+    {% for shard_id, shard in shard_data.items() %}
+        <input type="hidden" name="{{shard_id}}" value="{{shard['next_iterator']}}">
+    {% endfor %}
     <input type="hidden" name="active_stream_name" value="{{active_stream_name}}">
     <label>Number of random users to add to shard:</label><br>
     <input type="number" name="num_users"><br>
