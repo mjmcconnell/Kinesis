@@ -17,6 +17,20 @@ This file is used by the [boto library](http://docs.pythonboto.org/en/latest/), 
 Once you are all setup, you can then run the web app by opening up a terminal, moving into the root of this repo and running `make run`.
 You will then be able to access the app via [http://localhost:8080](http://localhost:8080)
 
+## Bash
+
+If you need to open a interactive terminal for the container, you can do that in one of two ways.
+If the app is not running:
+
+    make bash
+
+If the app is running:
+
+    make attach
+
+Note that containers are temporary, so any changes you make, should be persisted in code.
+For example, if you need to install a new python package, run pip install, then persist the change in the `requirements.txt` file.
+
 ## Flow
 
 1/ User enters number of records to generate from the web app
