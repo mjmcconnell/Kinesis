@@ -4,6 +4,19 @@ This app is setup to as a playground for learning AWS's Kinesis service.
 
 Follows guidence from the official tutorial [here](https://aws.amazon.com/blogs/big-data/snakes-in-the-stream-feeding-and-eating-amazon-kinesis-streams-with-python/)
 
+## Setup
+
+This app is built with docker-compose, so you will need to install it to run. You can find the install instructions for your platform [here](https://docs.docker.com/compose/install/).
+
+You will also need to have an aws user setup, with permissions to read and write to aws kinesis and s3.
+Once you have the user setup, copy the access and secret keys into the `boto.cfg` file in the root of this repo.
+This file is used by the [boto library](http://docs.pythonboto.org/en/latest/), to connect with aws.
+
+## Running the app
+
+Once you are all setup, you can then run the web app by opening up a terminal, moving into the root of this repo and running `make run`.
+You will then be able to access the app via [http://localhost:8080](http://localhost:8080)
+
 ## Flow
 
 1/ User enters number of records to generate from the web app
