@@ -36,10 +36,19 @@
 </form>
 
 <h3>Records</h3>
-<table>
-    {% for r in records %}
-        <tr>
-            <td>{{r}}</td>
-        </tr>
-    {% endfor %}
-</table>
+<hr>
+{% for shard_id, records in shard_records.items() %}
+    <table>
+        <thead>
+            <tr><td>{{shard_id}}</td></tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+                <tr>
+                    <td>{{r}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <hr>
+{% endfor %}

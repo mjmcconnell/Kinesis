@@ -98,15 +98,15 @@ class KinesisStreamManager(object):
         return client.describe_stream(StreamName=stream_name)
 
     @classmethod
-    def get_latest_records(cls, shard_id, shard_it=None):
+    def get_latest_records(cls, stream_name, shard_id, shard_it=None):
         if shard_it is None:
-            shard_it = cls.get_current_iterator(shard_id)
+            shard_it = cls.get_current_iterator(stream_name, shard_id)
 
         try:
             return client.get_records(ShardIterator=shard_it)
         except client.exceptions.ExpiredIteratorException:
             return {
-                'NextShardIterator': cls.get_current_iterator(shard_id),
+                'NextShardIterator': cls.get_current_iterator(stream_name, shard_id),
                 'Records': [
                     'Iterator has expired, and buffer has been cleaner.',
                     'All records should now be in the S3 bucket'
@@ -114,9 +114,9 @@ class KinesisStreamManager(object):
             }
 
     @classmethod
-    def get_current_iterator(cls, shard_id):
+    def get_current_iterator(cls, stream_name, shard_id):
         return client.get_shard_iterator(
-            StreamName=KINESIS_STREAM_ID,
+            StreamName=stream_name,
             ShardId=shard_id,
             ShardIteratorType='LATEST'
         )['ShardIterator']
