@@ -1,5 +1,6 @@
 # stdlib imports
 import json
+import time
 
 # third-party imports
 import boto3
@@ -40,8 +41,8 @@ class KinesisStreamManager(object):
         )
 
     @classmethod
-    def _current_stream_status(cls):
-        stream_desc = client.describe_stream(StreamName=KINESIS_STREAM_ID)
+    def _current_stream_status(cls, stream_name):
+        stream_desc = client.describe_stream(StreamName=stream_name)
         return stream_desc['StreamDescription']['StreamStatus']
 
     @classmethod
@@ -127,16 +128,18 @@ class KinesisStreamManager(object):
             cls.enable_encryption(stream_name)
 
     @classmethod
-    def enable_encryption(cls, stream_name, encryption_type='KMS', key_id='aws/kinesis'):
+    def enable_encryption(cls, stream_name, encryption_type='KMS', key_id='alias/aws/kinesis'):
+        while cls.get_status(stream_name) == 'CREATING':
+            time.sleep(1)
         cls._enable_stream_encryption(stream_name, encryption_type, key_id)
 
     @classmethod
-    def disable_encryption(cls, encryption_type='KMS', key_id='aws/kinesis'):
+    def disable_encryption(cls, encryption_type='KMS', key_id='alias/aws/kinesis'):
         cls._disable_stream_encryption(encryption_type, key_id)
 
     @classmethod
-    def get_status(cls):
-        return cls._current_stream_status()
+    def get_status(cls, stream_name):
+        return cls._current_stream_status(stream_name)
 
     @classmethod
     def list(cls, limit=10, exclusive_start_stream_name=None):
