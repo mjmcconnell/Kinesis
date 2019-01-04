@@ -4,6 +4,7 @@ services:
   app:
     image: python:3.7
     environment:
+      - AWS_CONFIG_FILE=/etc/boto.cfg
       - FLASK_APP=app.py
       - FLASK_ENV=development
     volumes:

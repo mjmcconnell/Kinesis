@@ -2,47 +2,46 @@
 import json
 
 # third-party imports
-from boto import kinesis
+import boto3
 
 # local imports
-from config import KINESIS_REGION
 from config import KINESIS_STREAM_ID
 
 
-client = kinesis.connect_to_region(KINESIS_REGION)
+client = boto3.client('kinesis')
 
 
 class KinesisStreamManager(object):
 
     @classmethod
-    def _create_stream(cls, shard_count):
+    def _create_stream(cls, stream_name, shard_count, is_encrypted):
         try:
             client.create_stream(
-                stream_name=KINESIS_STREAM_ID,
-                shard_count=shard_count
+                StreamName=stream_name,
+                ShardCount=shard_count
             )
-        except kinesis.exceptions.ResourceInUseException:
+        except client.exceptions.ResourceInUseException:
             pass
 
     @classmethod
-    def _enable_stream_encryption(cls, encryption_type, key_id):
+    def _enable_stream_encryption(cls, stream_name, encryption_type, key_id):
         return client.start_stream_encryption(
-            stream_name=KINESIS_STREAM_ID,
-            encryption_type=encryption_type,
-            key_id=key_id
+            StreamName=stream_name,
+            EncryptionType=encryption_type,
+            KeyId=key_id
         )
 
     @classmethod
     def _disable_stream_encryption(cls, encryption_type, key_id):
         return client.stop_stream_encryption(
-            stream_name=KINESIS_STREAM_ID,
-            encryption_type=encryption_type,
-            key_id=key_id
+            StreamName=KINESIS_STREAM_ID,
+            EncryptionType=encryption_type,
+            KeyId=key_id
         )
 
     @classmethod
     def _current_stream_status(cls):
-        stream_desc = client.describe_stream(KINESIS_STREAM_ID)
+        stream_desc = client.describe_stream(StreamName=KINESIS_STREAM_ID)
         return stream_desc['StreamDescription']['StreamStatus']
 
     @classmethod
@@ -62,10 +61,10 @@ class KinesisStreamManager(object):
             }
         """
         stream_names = []
-        response = client.list_streams(
-            limit=limit,
-            exclusive_start_stream_name=exclusive_start_stream_name
-        )
+        request_kwargs = {'Limit': limit}
+        if exclusive_start_stream_name:
+            request_kwargs['ExclusiveStartStreamNam'] = exclusive_start_stream_name
+        response = client.list_streams(**request_kwargs)
         stream_names += response['StreamNames']
         if response['HasMoreStreams']:
             stream_names += cls._list_streams(
@@ -95,7 +94,7 @@ class KinesisStreamManager(object):
                 }
             }
         """
-        return client.describe_stream(stream_name=stream_name)
+        return client.describe_stream(StreamName=stream_name)
 
     @classmethod
     def get_latest_records(cls, shard_id, shard_it=None):
@@ -103,8 +102,8 @@ class KinesisStreamManager(object):
             shard_it = cls.get_current_iterator(shard_id)
 
         try:
-            return client.get_records(shard_iterator=shard_it)
-        except kinesis.exceptions.ExpiredIteratorException:
+            return client.get_records(ShardIterator=shard_it)
+        except client.exceptions.ExpiredIteratorException:
             return {
                 'NextShardIterator': cls.get_current_iterator(shard_id),
                 'Records': [
@@ -115,15 +114,21 @@ class KinesisStreamManager(object):
 
     @classmethod
     def get_current_iterator(cls, shard_id):
-        return client.get_shard_iterator(KINESIS_STREAM_ID, shard_id, 'LATEST')['ShardIterator']
+        return client.get_shard_iterator(
+            StreamName=KINESIS_STREAM_ID,
+            ShardId=shard_id,
+            ShardIteratorType='LATEST'
+        )['ShardIterator']
 
     @classmethod
-    def create(cls, shard_count=1):
-        return cls._create_stream(shard_count)
+    def create(cls, stream_name, shard_count=1, is_encrypted=False):
+        cls._create_stream(stream_name, shard_count, is_encrypted)
+        if is_encrypted:
+            cls.enable_encryption(stream_name)
 
     @classmethod
-    def enable_encryption(cls, encryption_type='KMS', key_id='aws/kinesis'):
-        cls._enable_stream_encryption(encryption_type, key_id)
+    def enable_encryption(cls, stream_name, encryption_type='KMS', key_id='aws/kinesis'):
+        cls._enable_stream_encryption(stream_name, encryption_type, key_id)
 
     @classmethod
     def disable_encryption(cls, encryption_type='KMS', key_id='aws/kinesis'):
@@ -143,7 +148,7 @@ class KinesisStreamManager(object):
 
     @classmethod
     def close(cls):
-        return client.delete_stream(KINESIS_STREAM_ID)
+        return client.delete_stream(StreamName=KINESIS_STREAM_ID)
 
     @classmethod
     def load(cls, num_users):
@@ -159,4 +164,8 @@ class KinesisStreamManager(object):
                 'name': f'user {i}',
                 'address': f'address {i}'
             }
-            client.put_record(KINESIS_STREAM_ID, json.dumps(user), 'partitionkey')
+            client.put_record(
+                StreamName=KINESIS_STREAM_ID,
+                Data=json.dumps(user),
+                PartitionKey='partitionkey',
+            )

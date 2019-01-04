@@ -2,18 +2,25 @@
 
 <h3>Streams</h3>
 <form method="POST" action="/set_stream">
-    <label>Select active stream</label>
+    <label>Select active stream</label><br>
     <select name="stream_name">
+        <option>-----</option>
         {% for stream_name, stream_label in streams %}
-            <option>-----</option>
             <option value="{{stream_name}}" {% if stream_name == active_stream_name %} selected {% endif %}>
                 {{stream_label}}
             </option>
         {% endfor %}
     </select>
     <hr>
+    Or
+    <hr>
     <label>Create new stream</label>
-    <input type="text" name="new_stream_name">
+    <input type="text" name="new_stream_name"><br>
+    <label>Number of shards</label>
+    <input type="number" name="shard_count"><br>
+    <label>Enable encryption</label>
+    <input type="radio" name="is_encrypted" value="1"> On
+    <input type="radio" name="is_encrypted" value="0" checked> Off
     <hr>
     <input type="submit" label="submit">
 </form>
@@ -22,8 +29,9 @@
 
 <form method="POST" action="/add_records">
     <input type="hidden" name="next_shard_it" value="{{next_iterator}}">
-    <label>Number of random users to add to shard:</label>
-    <input type="number" name="num_users">
+    <input type="hidden" name="active_stream_name" value="{{active_stream_name}}">
+    <label>Number of random users to add to shard:</label><br>
+    <input type="number" name="num_users"><br>
     <input type="submit" label="submit">
 </form>
 

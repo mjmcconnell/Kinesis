@@ -57,3 +57,7 @@ The maximum size of the data payload of a record before base64-encoding is up to
 Each shard can support up to five read transactions per second. Each read transaction can provide up to 10,000 records with an upper limit of 10 MiB per transaction.
 
 Each shard can support up to a maximum total data read rate of 2 MiB per second via `GetRecords`. If a call to `GetRecords` returns 10 MiB, subsequent calls made within the next 5 seconds throw an exception.
+
+### From boto doc string
+The default limit for an AWS account is 10 shards per stream.
+If you need to create a stream with more than 10 shards, `contact AWS Support`_ to increase the limit on your account.
