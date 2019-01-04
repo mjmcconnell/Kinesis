@@ -30,9 +30,10 @@ def index():
 
         for shard in stream_desc['Shards']:
             latest_records = stream.get_latest_records(shard['ShardId'], current_iterator)
-            next_iterator = latest_records['NextShardIterator']
-            if latest_records['Records']:
-                records = latest_records['Records']
+            if latest_records:
+                next_iterator = latest_records['NextShardIterator']
+                if latest_records['Records']:
+                    records = latest_records['Records']
 
     return render_template('index.html', **{
         'active_streams': active_streams,

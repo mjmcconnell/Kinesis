@@ -1,6 +1,5 @@
 # stdlib imports
 import json
-import time
 
 # third-party imports
 from boto import kinesis
@@ -103,7 +102,16 @@ class KinesisStreamManager(object):
         if shard_it is None:
             shard_it = cls.get_current_iterator(shard_id)
 
-        return client.get_records(shard_iterator=shard_it)
+        try:
+            return client.get_records(shard_iterator=shard_it)
+        except kinesis.exceptions.ExpiredIteratorException:
+            return {
+                'NextShardIterator': cls.get_current_iterator(shard_id),
+                'Records': [
+                    'Iterator has expired, and buffer has been cleaner.',
+                    'All records should now be in the S3 bucket'
+                ]
+            }
 
     @classmethod
     def get_current_iterator(cls, shard_id):
