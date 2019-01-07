@@ -14,3 +14,12 @@ services:
       - 8080:8080
     working_dir: /usr/src
     command: make run
+
+  locust:
+    image: python:3.7
+    volumes:
+      - ./locust:/usr/src
+    ports:
+      - 5000:5000
+    working_dir: /usr/src
+    command: make run
