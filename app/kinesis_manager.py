@@ -1,6 +1,7 @@
 # stdlib imports
 import json
 import time
+from datetime import datetime
 
 # third-party imports
 import boto3
@@ -161,8 +162,9 @@ class KinesisStreamManager(object):
         """
         for i in range(num_users):
             user = {
-                'name': f'user {i}',
-                'address': f'address {i}'
+                'user': f'user {i}',
+                'action': i,
+                'timestamp': str(datetime.now())
             }
             client.put_record(
                 StreamName=stream_name,

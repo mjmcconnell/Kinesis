@@ -14,7 +14,6 @@ from kinesis_manager import KinesisStreamManager
 
 app = Flask(__name__)
 stream = KinesisStreamManager()
-# stream.create()
 
 
 def get_streams():
