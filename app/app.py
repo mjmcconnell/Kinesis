@@ -51,6 +51,20 @@ def index():
     })
 
 
+@app.route('/add_record', methods=['POST'])
+def add_user():
+    from datetime import datetime
+    import requests
+    host = ''
+    body = {
+        'user': f'user 1',
+        'action': '0',
+        'timestamp': str(datetime.now())
+    }
+    print(requests.post(host, data=body))
+    return redirect('/')
+
+
 @app.route('/add_records', methods=['POST'])
 def add():
     shard_its = '&'.join([f'{k}={v}' for k, v in request.form.items() if k.startswith('shardId')])
