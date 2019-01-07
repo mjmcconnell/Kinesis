@@ -5,9 +5,6 @@ import time
 # third-party imports
 import boto3
 
-# local imports
-from config import KINESIS_STREAM_ID
-
 
 client = boto3.client('kinesis')
 
@@ -33,9 +30,9 @@ class KinesisStreamManager(object):
         )
 
     @classmethod
-    def _disable_stream_encryption(cls, encryption_type, key_id):
+    def _disable_stream_encryption(cls, stream_name, encryption_type, key_id):
         return client.stop_stream_encryption(
-            StreamName=KINESIS_STREAM_ID,
+            StreamName=stream_name,
             EncryptionType=encryption_type,
             KeyId=key_id
         )
@@ -150,11 +147,11 @@ class KinesisStreamManager(object):
         return cls._describe_stream(stream_name).get('StreamDescription')
 
     @classmethod
-    def close(cls):
-        return client.delete_stream(StreamName=KINESIS_STREAM_ID)
+    def close(cls, stream_name):
+        return client.delete_stream(StreamName=stream_name)
 
     @classmethod
-    def load(cls, num_users):
+    def load(cls, stream_name, num_users):
         """Populates the stream with user data.
 
         `put_record` sample response:
@@ -168,7 +165,7 @@ class KinesisStreamManager(object):
                 'address': f'address {i}'
             }
             client.put_record(
-                StreamName=KINESIS_STREAM_ID,
+                StreamName=stream_name,
                 Data=json.dumps(user),
                 PartitionKey='partitionkey',
             )

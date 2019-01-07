@@ -37,6 +37,7 @@
     <input type="submit" label="submit">
 </form>
 
+
 <h3>Records</h3>
 <hr>
 {% for shard_id, shard in shard_data.items() %}
@@ -47,7 +48,7 @@
         <tbody>
             {% for record in shard['records'] %}
                 <tr>
-                    <td>{{r}}</td>
+                    <td>{{record}}</td>
                 </tr>
             {% endfor %}
         </tbody>
