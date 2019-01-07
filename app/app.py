@@ -58,7 +58,6 @@ def add():
     num_users = request.form.get('num_users', 0)
     stream_name = request.form.get('active_stream_name')
 
-    print(f'CREATING {num_users} USER ACCOUNTS')
     stream.load(
         stream_name=stream_name,
         num_users=int(num_users)

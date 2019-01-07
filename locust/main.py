@@ -7,7 +7,7 @@ class WebsiteTasks(TaskSet):
     def add_users(self):
         self.client.post("/add_records", {
             "active_stream_name": "marks-new-stream",
-            "num_users": "100"
+            "num_users": "1000"
         })
 
 
