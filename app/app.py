@@ -1,8 +1,11 @@
 # stdlib imports
+import json
 import urllib
 from collections import defaultdict
+from datetime import datetime
 
 # third-party imports
+import requests
 from flask import Flask
 from flask import redirect
 from flask import render_template
@@ -51,18 +54,31 @@ def index():
     })
 
 
-@app.route('/add_record', methods=['POST'])
-def add_user():
-    from datetime import datetime
-    import requests
-    host = ''
+@app.route('/add_non_priority_user', methods=['POST'])
+def add_non_priority_user():
+    send_user_request(category=1)
+    return redirect('/')
+
+
+@app.route('/add_priority_user', methods=['POST'])
+def add_priority_user():
+    send_user_request(category=2)
+    return redirect('/')
+
+
+def send_user_request(category):
+    host = 'https://g4xbl9axui.execute-api.eu-west-1.amazonaws.com/default/community-validation-checker'
     body = {
-        'user': f'user 1',
-        'action': '0',
+        'user': 'user',
+        'action': category,
         'timestamp': str(datetime.now())
     }
-    print(requests.post(host, data=body))
-    return redirect('/')
+    resp = requests.post(
+        host,
+        data=json.dumps(body),
+        headers={'Content-Type': 'application/json'}
+    )
+    return resp
 
 
 @app.route('/add_records', methods=['POST'])

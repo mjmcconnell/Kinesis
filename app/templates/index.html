@@ -37,14 +37,6 @@
     <input type="submit" label="submit">
 </form>
 
-<hr>
-
-Add single record
-<form method="POST" action="/add_record">
-    <input type="submit" label="submit">
-</form>
-
-
 <h3>Records</h3>
 <hr>
 {% for shard_id, shard in shard_data.items() %}
@@ -62,3 +54,17 @@ Add single record
     </table>
     <hr>
 {% endfor %}
+
+
+<hr>
+
+Add priority user
+<form method="POST" action="/add_priority_user">
+    <input type="submit" label="submit">
+</form>
+<hr>
+
+Add non priority user
+<form method="POST" action="/add_non_priority_user">
+    <input type="submit" label="submit">
+</form>
